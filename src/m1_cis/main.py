@@ -117,13 +117,13 @@ class ContextSearch:
         - Rank all returned images by CLIP cosine similarity to imageDescription
         - Return best URL per pair (empty if none valid)
         """
-        pairs_raw = self.ai.get_image_search_pairs(context)
+        pairs_raw = self.ai.get_image_search_pairs(context, limit=limit, custom_prompt=custom_prompt)
         pairs = [ImageSearchPair(**p) for p in pairs_raw]
 
         results: List[ImageSearchResult] = []
 
         for pair in pairs:
-            images = self._get_images(pair.searchQuerry, limit=limit, custom_prompt=custom_prompt)
+            images = self._get_images(pair.searchQuerry)
             if not images:
                 results.append(
                     ImageSearchResult(imageDescription=pair.imageDescription, url="", imageSearchQuery=pair.searchQuerry)

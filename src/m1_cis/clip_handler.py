@@ -6,46 +6,61 @@ from typing import List, Optional, Sequence, Tuple
 import requests
 from PIL import Image
 import torch
-from transformers import CLIPModel, CLIPProcessor
+from transformers import (
+    CLIPModel,
+    AutoTokenizer,
+    AutoImageProcessor,
+)
 
 
 class CLIPHandler:
     """
     Evaluate how well different images match a given description using CLIP embeddings.
 
-    - Loads CLIPModel + CLIPProcessor (embedding mode).
+    - Loads CLIPModel + explicit tokenizer + image processor (no CLIPProcessor.__call__).
     - Provides:
         - text_image_similarity: score a single image vs a description
         - rank_images_by_description: rank many images vs one description (batched)
     """
 
     model: Optional[CLIPModel]
-    processor: Optional[CLIPProcessor]
+    tokenizer: Optional[object]
+    image_processor: Optional[object]
 
     def __init__(self, model_name: str = "openai/clip-vit-large-patch14") -> None:
         self.model_name = model_name
         self.model = None
-        self.processor = None
+        self.tokenizer = None
+        self.image_processor = None
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         # Choose reasonable dtype
         if self.device.type == "cuda":
-            # float16 is broadly supported on CUDA; bf16 support varies
             self.torch_dtype = torch.float16
         else:
             self.torch_dtype = torch.float32
 
     def init(self) -> None:
         """
-        Initialize CLIP model and processor.
+        Initialize CLIP model, tokenizer, and image processor.
         """
-        self.processor = CLIPProcessor.from_pretrained(self.model_name, use_fast=True)
-        self.model = CLIPModel.from_pretrained(self.model_name, dtype=self.torch_dtype)
+        # Explicit components avoid the CLIPProcessor fast-image-processor bug
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
+        self.image_processor = AutoImageProcessor.from_pretrained(self.model_name)
+        self.model = CLIPModel.from_pretrained(
+            self.model_name, torch_dtype=self.torch_dtype
+        )
         self.model.to(self.device)
         self.model.eval()
 
     def _load_image(self, url: str) -> Image.Image:
-        headers = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) ")}
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0 Safari/537.36"
+            )
+        }
         resp = requests.get(url, stream=True, timeout=20, headers=headers)
         resp.raise_for_status()
         img = Image.open(BytesIO(resp.content)).convert("RGB")
@@ -53,28 +68,33 @@ class CLIPHandler:
 
     @torch.no_grad()
     def _encode_text(self, text: str) -> torch.Tensor:
-        if self.model is None or self.processor is None:
+        if self.model is None or self.tokenizer is None:
             raise RuntimeError("CLIPHandler not initialized. Call .init() first.")
-        inputs = self.processor(text=[text], return_tensors="pt", padding=True)
-        inputs = {k: v.to(self.device) for k, v in inputs.items()}
-        text_embeds = self.model.get_text_features(**inputs)
+        enc = self.tokenizer(
+            [text],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+        )
+        enc = {k: v.to(self.device) for k, v in enc.items()}
+        text_embeds = self.model.get_text_features(**enc)
         text_embeds = text_embeds / text_embeds.norm(p=2, dim=-1, keepdim=True)
-        return text_embeds  # shape: [1, d]
+        return text_embeds  # [1, d]
 
     @torch.no_grad()
     def _encode_images(self, images: Sequence[Image.Image]) -> torch.Tensor:
-        if self.model is None or self.processor is None:
+        if self.model is None or self.image_processor is None:
             raise RuntimeError("CLIPHandler not initialized. Call .init() first.")
-        inputs = self.processor(images=list(images), return_tensors="pt")
-        inputs = {k: v.to(self.device) for k, v in inputs.items()}
-        image_embeds = self.model.get_image_features(**inputs)
+        enc = self.image_processor(images=list(images), return_tensors="pt")
+        enc = {k: v.to(self.device) for k, v in enc.items()}
+        image_embeds = self.model.get_image_features(**enc)
         image_embeds = image_embeds / image_embeds.norm(p=2, dim=-1, keepdim=True)
-        return image_embeds  # shape: [N, d]
+        return image_embeds  # [N, d]
 
     def text_image_similarity(self, link: str, text: str) -> float:
         """
         Compute cosine similarity between an image (by URL) and a text description.
-        Returns a scalar score, higher is better.
+        Returns a scalar score, higher is better. Returns -1.0 on load failure.
         """
         if self.model is None:
             raise RuntimeError("CLIPHandler not initialized. Call .init() first.")
@@ -117,12 +137,10 @@ class CLIPHandler:
                 print(f"[WARN] Failed to load {url}: {e}")
                 loaded.append((i, url, None))
 
-        # Encode text once
         with torch.no_grad():
             text_emb = self._encode_text(description)  # [1, d]
 
         results: List[Tuple[str, float]] = []
-        # Process images in batches
         batch: List[Tuple[int, str, Image.Image]] = []
         for i, url, img in loaded:
             if img is None:
@@ -135,7 +153,6 @@ class CLIPHandler:
         if batch:
             results.extend(self._score_batch(batch, text_emb))
 
-        # Sort by score desc
         results.sort(key=lambda x: x[1], reverse=True)
         return results
 
@@ -146,16 +163,11 @@ class CLIPHandler:
         images = [img for _, _, img in batch]
         image_embs = self._encode_images(images)  # [B, d]
         sims = torch.matmul(image_embs, text_emb.T).squeeze(-1)  # [B]
-        out: List[Tuple[str, float]] = []
-        for (i, url, _), score in zip(batch, sims):
-            out.append((url, float(score.item())))
-        return out
+        return [(url, float(score.item())) for (_, url, _), score in zip(batch, sims)]
 
     def _test_clip(self) -> Tuple[float, float]:
         """
-        Example test:
-        Evaluate two images against the SAME description to ensure
-        hoodie image > hat image for 'tiger wearing a hoodie'.
+        Example test: compare two URLs vs the same description.
         """
         hoodie_desc = "a tiger wearing a hoodie"
         url_hoodie = (
@@ -168,7 +180,6 @@ class CLIPHandler:
         )
 
         ranked = self.rank_images_by_description(hoodie_desc, [url_hoodie, url_hat], batch_size=2)
-        # Return scores in the same order as inputs for convenience
         scores_by_url = {u: s for u, s in ranked}
         score_hoodie = scores_by_url.get(url_hoodie, -1.0)
         score_hat = scores_by_url.get(url_hat, -1.0)

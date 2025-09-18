@@ -14,12 +14,12 @@ to aquire visit:
 ## Demo
 You can check out the provided demo on [github](https://github.com/M1chol/m1-cis) in `./demo`. To get started:
 1. `clone` [source repo](https://github.com/M1chol/m1-cis)
-1. `cd` into `demo` dir
-2. run `python -m venv .venv`
-3. run `source .venv/bin/activate` or `venv\Scripts\activate` if on windows
-3. run `pip install -r requierments.txt`
-4. populate `.env.example` and rename to `.env`
-5. run `streamlit run demo.py`
+2. `cd` into `demo` dir
+3. run `python -m venv .venv`
+4. run `source .venv/bin/activate` or `venv\Scripts\activate` if on windows
+5. run `pip install -r requierments.txt`
+6. populate `.env.example` and rename to `.env`
+7. run `streamlit run demo.py`
 
 ## Example
 context: `Rheinmetall to Acquire German Naval Shipbuilder NVL`

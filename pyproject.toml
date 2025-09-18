@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "m1-cis"
-version = "0.0.3"
+version = "0.0.5"
 authors = [
   { name="Michał Kozłowski", email="m1chol@proton.me" },
 ]
@@ -13,6 +13,7 @@ dependencies = [
   "google-genai>=1.38.0",
   "transformers>=4.56.1",
   "torch>=2.8.0",
+  "torchvision>=0.23.0",
   "pydantic>=2.11.9",
   "Pillow>=11.3.0",
   "requests>=2.32.5"
