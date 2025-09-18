@@ -1,0 +1,11 @@
+google-genai
+transformers
+torch
+torchvision
+pydantic
+python-dotenv
+Pillow
+requests
+pytest
+build
+twine
