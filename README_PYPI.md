@@ -1,14 +1,5 @@
-> [!WARNING]
-> This package is in development
-
 ## Context Image Search
 This utility provides you with advanced context to image search. 
-
-## How it works
-1. Decomposes given text (context) into search querries using `gemini-2.5-flash-lite`
-2. Searches the querries on curated list of cc licensed images using google images
-3. Analyzes the images for visual match using ML
-4. Returns the best matching images
 
 ## Requiered variablas
 1. `GEMINI_API_KEY` - google gemini API key

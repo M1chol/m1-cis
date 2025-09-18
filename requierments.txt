@@ -1,11 +1,10 @@
 google-genai
 transformers
 torch
-torchvision
 pydantic
-python-dotenv
 Pillow
 requests
+python-dotenv
 pytest
 build
 twine

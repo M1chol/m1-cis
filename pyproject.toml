@@ -2,20 +2,22 @@
 requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
-[tool.pyright]
-typeCheckingMode = "strict"
-reportUnusedImport = "error"
-reportUnusedVariable = "error"
-reportUnknownVariableType = "error"
-
 [project]
 name = "m1-cis"
-version = "0.0.1"
+version = "0.0.3"
 authors = [
   { name="Michał Kozłowski", email="m1chol@proton.me" },
 ]
 description = "Context Image Search Utility"
-readme = "README.md"
+dependencies = [
+  "google-genai>=1.38.0",
+  "transformers>=4.56.1",
+  "torch>=2.8.0",
+  "pydantic>=2.11.9",
+  "Pillow>=11.3.0",
+  "requests>=2.32.5"
+]
+readme = "README_PYPI.md"
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
