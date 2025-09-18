@@ -24,8 +24,8 @@ def get_keys():
 def main():
     left, main, right = st.columns([1, 6, 1])
     with main:
-        st.set_page_config(page_title="ContextSearch Demo", page_icon="🔎", layout="wide")
-        st.title("🔎 ContextSearch Image Demo")
+        st.set_page_config(page_title="ContextSearch Demo v0.1.0", page_icon="🔎", layout="wide")
+        st.title("🔎 ContextSearch Image Demo v0.1.0")
         st.write("Search for images and display their description and query.")
 
         gemini_key, google_key, google_cx = get_keys()
