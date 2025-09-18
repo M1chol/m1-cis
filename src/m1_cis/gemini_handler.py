@@ -21,16 +21,18 @@ class GeminiHandler:
         self.client = genai.Client(api_key=google_api_key)
         self.model = "gemini-2.5-flash-lite"
 
-    def get_image_search_pairs(self, context: str) -> List[Dict[str, str]]:
+    def get_image_search_pairs(self, context: str, limit: int, custom_prompt: str) -> List[Dict[str, str]]:
         """
         Ask Gemini to generate 3 (imageDescription, searchQuerry) pairs as JSON.
         Returns a list of dicts with keys: imageDescription, searchQuerry.
         """
-        prompt = (
-            "Create short search queries that will yield good stock images for the "
-            "given context. Images should not be politically biased, be in any way "
-            "offensive. If there is a particular persona included, make sure that the search query is simple."
-            "Propose 3 image-search pairs.\n"
+        base = (
+            "Create short search queries that will yield stock images for the given context. "
+            "If context specifies a name, create one pair containing explicit search for it. "
+            )
+
+        prompt = base + custom_prompt + (
+            f"Propose {limit if limit > 0 else 1 : } image-search pairs.\n"
             f"context: {context}"
         )
 

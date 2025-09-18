@@ -109,7 +109,7 @@ class ContextSearch:
             )
         return images
 
-    def search(self, context: str, batch_size: int = 8) -> List[ImageSearchResult]:
+    def search(self, context: str, batch_size: int = 8, limit: int = 3, custom_prompt: str = "") -> List[ImageSearchResult]:
         """
         Full pipeline (embedding-based ranking):
         - Use Gemini to propose (imageDescription, searchQuerry)
@@ -123,7 +123,7 @@ class ContextSearch:
         results: List[ImageSearchResult] = []
 
         for pair in pairs:
-            images = self._get_images(pair.searchQuerry)
+            images = self._get_images(pair.searchQuerry, limit=limit, custom_prompt=custom_prompt)
             if not images:
                 results.append(
                     ImageSearchResult(imageDescription=pair.imageDescription, url="", imageSearchQuery=pair.searchQuerry)

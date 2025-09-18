@@ -39,7 +39,7 @@ class CLIPHandler:
         """
         Initialize CLIP model and processor.
         """
-        self.processor = CLIPProcessor.from_pretrained(self.model_name)
+        self.processor = CLIPProcessor.from_pretrained(self.model_name, use_fast=True)
         self.model = CLIPModel.from_pretrained(self.model_name, dtype=self.torch_dtype)
         self.model.to(self.device)
         self.model.eval()
