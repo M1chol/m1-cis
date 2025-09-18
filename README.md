@@ -4,6 +4,12 @@
 ## Context Image Search
 This utility provides you with advanced context to image search. 
 
+## Installing
+You can install from PyPi or build from source.
+```
+pip install m1-cis
+```
+
 ## Building
 1. `clone` [source repo](https://github.com/M1chol/m1-cis)
 2. `cd` into `demo` dir
