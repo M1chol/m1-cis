@@ -22,7 +22,6 @@ pip install m1-cis
 ### Uploading to `pypi.org`
 To upload previously built package run `python3 -m twine upload --repository pypi dist/*`.
 
-
 ## How it works
 1. Decomposes given text (context) into search querries using `gemini-2.5-flash-lite`
 2. Searches the querries on curated list of cc licensed images using google images
@@ -30,9 +29,8 @@ To upload previously built package run `python3 -m twine upload --repository pyp
 4. Returns the best matching images
 
 ## Requiered variablas
-1. `GEMINI_API_KEY` - google gemini API key
-2. `GOOGLE_API_KEY` - google custom search api key
-3. `GOOGLE_CX` programmable search engine id
+1. `GOOGLE_API_KEY` - google custom search api key
+2. `GOOGLE_CX` programmable search engine id
 
 As `GOOGLE_CX` you can use `37d934a53d9a8443e` which i set up to work with those domains.
 ```
@@ -48,12 +46,12 @@ www.pexels.com/*
 ```
 Or create your own [google custom search engine](https://programmablesearchengine.google.com)
 
-to aquire API keys visit:
-- [GEMINI_API_KEY (gemini ai studio)](https://aistudio.google.com/apikey)
-- [GOOGLE_API_KEY (custom search api)](https://console.cloud.google.com/apis/api/customsearch.googleapis.com) -> Credentials
+Please enable those API's for your key:
+- [Generative Language API (Gemini API)](https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com)
+- [Custom Search API](https://console.cloud.google.com/marketplace/product/google/customsearch.googleapis.com)
 
 ## Demo
-You can check out the provided demo on [github](https://github.com/M1chol/m1-cis) in `./demo`. To get started:
+You can check out the provided demo in `./demo`. To get started:
 1. `clone` [source repo](https://github.com/M1chol/m1-cis)
 2. `cd` into `demo` dir
 3. run `python -m venv .venv`

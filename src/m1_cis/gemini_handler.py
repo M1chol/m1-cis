@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import json
-from typing import Any, Dict, List
+from typing import List, cast
 
 from google import genai
 from google.genai import types
 
+from .types import ImageSearchPair
 
 class GeminiHandler:
     """
@@ -18,10 +18,13 @@ class GeminiHandler:
     def __init__(self, google_api_key: str) -> None:
         if not google_api_key:
             raise ValueError("Missing GEMINI_API_KEY. Please provide a valid key.")
-        self.client = genai.Client(api_key=google_api_key)
+        try:
+            self.client = genai.Client(api_key=google_api_key)
+        except:
+            raise ValueError("[m1-cis] GeminiHandler - wrong api key, did you enable Generative Language API?")
         self.model = "gemini-2.5-flash-lite"
 
-    def get_image_search_pairs(self, context: str, limit: int, custom_prompt: str) -> List[Dict[str, str]]:
+    def get_image_search_pairs(self, context: str, limit: int, custom_prompt: str) -> List[ImageSearchPair]:
         """
         Ask Gemini to generate 3 (imageDescription, searchQuerry) pairs as JSON.
         Returns a list of dicts with keys: imageDescription, searchQuerry.
@@ -41,69 +44,13 @@ class GeminiHandler:
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                response_schema={
-                    "type": "object",
-                    "properties": {
-                        "ImageSearchPair": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "imageDescription": {"type": "string"},
-                                    "searchQuerry": {"type": "string"},
-                                },
-                                "propertyOrdering": [
-                                    "imageDescription",
-                                    "searchQuerry",
-                                ],
-                                "required": ["imageDescription", "searchQuerry"],
-                            },
-                        }
-                    },
-                    "propertyOrdering": ["ImageSearchPair"],
-                    "required": ["ImageSearchPair"],
-                },
+                response_schema=list[ImageSearchPair]
             ),
         )
-
-        if response is None:
-            raise RuntimeError("Unknown generation fail, response undefined")
-
-        json_text = response.text
-        if not json_text:
-            raise RuntimeError("Response did not contain JSON text")
-
-        try:
-            parsed: Any = json.loads(json_text)
-        except Exception as e:
-            raise RuntimeError(f"Failed to parse AI JSON response: {e}") from e
-
-        if isinstance(parsed, dict) and "ImageSearchPair" in parsed:
-            pairs = parsed["ImageSearchPair"]
-            if isinstance(pairs, list):
-                # Ensure each item is a dict with required keys
-                filtered: List[Dict[str, str]] = []
-                for item in pairs:
-                    if (
-                        isinstance(item, dict)
-                        and "imageDescription" in item
-                        and "searchQuerry" in item
-                    ):
-                        filtered.append(
-                            {
-                                "imageDescription": str(item["imageDescription"]),
-                                "searchQuerry": str(item["searchQuerry"]),
-                            }
-                        )
-                return filtered
-
-        raise RuntimeError("Invalid response format. Expected ImageSearchPair[]")
-
-    def _test_ai(self) -> str:
-        """
-        Simple generation test.
-        """
-        response = self.client.models.generate_content(
-            model=self.model, contents="Explain how AI works in a few words"
-        )
-        return response.text or ""
+        parsed: list[ImageSearchPair]
+        if response.parsed is not None:
+            parsed = cast(list[ImageSearchPair], response.parsed)
+        else:
+            raise ValueError("Failed to parse AI response")
+        
+        return parsed
