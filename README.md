@@ -11,7 +11,7 @@ pip install m1-cis
 ```
 
 ## Building
-1. `clone` [source repo](https://github.com/M1chol/m1-cis)
+1. `git clone https://github.com/M1chol/m1-cis`
 2. `cd` into `demo` dir
 3. run `python -m venv .venv`
 4. run `source .venv/bin/activate` or `venv\Scripts\activate` if on windows
