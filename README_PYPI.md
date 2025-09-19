@@ -2,24 +2,29 @@
 This utility provides you with advanced context to image search. 
 
 ## Requiered variablas
-1. `GEMINI_API_KEY` - google gemini API key
-2. `GOOGLE_API_KEY` - google custom search api key
-3. `GOOGLE_CX` programmable search engine id
+1. `GOOGLE_API_KEY` - google custom search api key
+2. `GOOGLE_CX` programmable search engine id
 
-to aquire visit:
-- [google gemini key](https://aistudio.google.com/apikey)
-- [google custom search api](https://console.cloud.google.com/apis/api/customsearch.googleapis.com) -> Credentials
-- [google custom search engine id](https://programmablesearchengine.google.com)
+As `GOOGLE_CX` you can use `37d934a53d9a8443e` which i set up to work with those domains.
+```
+www.flickr.com/*
+www.freepik.com/*
+*.openverse.org/*
+*.nappy.co/*
+www.wikipedia.org/*
+commons.wikimedia.org/*
+*.unsplash.com/*
+www.pexels.com/*
+*.pixabay.com/*
+```
+Or create your own [google custom search engine](https://programmablesearchengine.google.com)
+
+Please enable those API's for your key:
+- [Generative Language API (Gemini API)](https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com)
+- [Custom Search API](https://console.cloud.google.com/marketplace/product/google/customsearch.googleapis.com)
 
 ## Demo
-You can check out the provided demo on [github](https://github.com/M1chol/m1-cis) in `./demo`. To get started:
-1. `clone` [source repo](https://github.com/M1chol/m1-cis)
-2. `cd` into `demo` dir
-3. run `python -m venv .venv`
-4. run `source .venv/bin/activate` or `venv\Scripts\activate` if on windows
-5. run `pip install -r requierments.txt`
-6. populate `.env.example` and rename to `.env`
-7. run `streamlit run demo.py`
+[See github page](https://github.com/M1chol/m1-cis?tab=readme-ov-file#demo)
 
 ## Example
 context: `Rheinmetall to Acquire German Naval Shipbuilder NVL`

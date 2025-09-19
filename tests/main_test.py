@@ -1,13 +1,9 @@
 import os
-import sys
 from PIL import Image
-import pytest
 from dotenv import load_dotenv
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../src"))
-
 from m1_cis.types import ImageSearchPair, ImageResult, ImageSearchResult
-from m1_cis.main import ContextSearchTester
+from m1_cis.tests import ContextSearchTester
 
 load_dotenv()
 
@@ -31,7 +27,6 @@ def test_ai_basic_text() -> None:
     print(f"basic text response: {output}")
     assert isinstance(output, str)
 
-@pytest.mark.timeout(30)
 def test_ai_structured_output() -> None:
     output = tester.test_ai_structured()
     assert isinstance(output, list)
@@ -55,7 +50,6 @@ def test_image_load() -> None:
     image = tester.test_load_image()
     assert isinstance(image, Image.Image)
 
-@pytest.mark.timeout(300)
 def test_clip_image_score() -> None:
     score1, score2 = tester.test_clip()
     assert score1 < score2

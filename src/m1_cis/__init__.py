@@ -1,7 +1,11 @@
+__all__ = [
+    "ContextSearch",
+    "types",
+    "tests"
+]
+
 from .main import (
     ContextSearch,
 )
-
-__all__ = [
-    "ContextSearch",
-]
+from . import types
+from . import tests
