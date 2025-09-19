@@ -34,10 +34,23 @@ To upload previously built package run `python3 -m twine upload --repository pyp
 2. `GOOGLE_API_KEY` - google custom search api key
 3. `GOOGLE_CX` programmable search engine id
 
-to aquire visit:
-- [google gemini key](https://aistudio.google.com/apikey)
-- [google custom search api](https://console.cloud.google.com/apis/api/customsearch.googleapis.com) -> Credentials
-- [google custom search engine id](https://programmablesearchengine.google.com)
+As `GOOGLE_CX` you can use `37d934a53d9a8443e` which i set up to work with those domains.
+```
+www.flickr.com/*
+www.freepik.com/*
+*.openverse.org/*
+*.nappy.co/*
+www.wikipedia.org/*
+commons.wikimedia.org/*
+*.unsplash.com/*
+www.pexels.com/*
+*.pixabay.com/*
+```
+Or create your own [google custom search engine](https://programmablesearchengine.google.com)
+
+to aquire API keys visit:
+- [GEMINI_API_KEY (gemini ai studio)](https://aistudio.google.com/apikey)
+- [GOOGLE_API_KEY (custom search api)](https://console.cloud.google.com/apis/api/customsearch.googleapis.com) -> Credentials
 
 ## Demo
 You can check out the provided demo on [github](https://github.com/M1chol/m1-cis) in `./demo`. To get started:
