@@ -1,34 +1,32 @@
 import os
 import sys
 import traceback
-from typing import List
 import streamlit as st
 from m1_cis import ContextSearch
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_keys():
-    gemini = os.getenv("GEMINI_API_KEY")
+def get_keys() -> tuple[str | None, str | None]:
     gkey = os.getenv("GOOGLE_API_KEY")
     gcx = os.getenv("GOOGLE_CX")
-    missing = [k for k, v in [("GEMINI_KEY", gemini), ("GOOGLE_KEY", gkey), ("GOOGLE_CX", gcx)] if not v]
+    missing = [k for k, v in [("GOOGLE_KEY", gkey), ("GOOGLE_CX", gcx)] if not v]
     if missing:
         st.warning(
             "Missing environment variables: "
             + ", ".join(missing)
             + ". Set them before running."
         )
-    return gemini, gkey, gcx
+    return gkey, gcx
 
-def main():
-    left, main, right = st.columns([1, 6, 1])
+def main() -> None:
+    _, main, _ = st.columns([1, 6, 1])
     with main:
-        st.set_page_config(page_title="ContextSearch Demo v0.1.0", page_icon="🔎", layout="wide")
-        st.title("🔎 ContextSearch Image Demo v0.1.0")
+        st.set_page_config(page_title="ContextSearch Demo v0.2.0", page_icon="🔎", layout="wide")
+        st.title("🔎 ContextSearch Image Demo v0.2.0")
         st.write("Search for images and display their description and query.")
 
-        gemini_key, google_key, google_cx = get_keys()
+        google_key, google_cx = get_keys()
         query = st.text_input("Context:", value="", placeholder="Your context")
         custom_prompt = st.text_input("Custom prompt injection (optional), could be used to specify style", value="", placeholder="Custom injection")
         limit = st.number_input("Number of results", value=3)
@@ -38,17 +36,17 @@ def main():
             if not query.strip():
                 st.info("Please enter a query.")
                 return
-            if not (gemini_key and google_key and google_cx):
-                st.error("API keys are missing. Please set GEMINI_KEY, GOOGLE_KEY, GOOGLE_CX.")
+            if not (google_key and google_cx):
+                st.error("API keys are missing. Please set, GOOGLE_KEY, GOOGLE_CX.")
                 return
 
             with st.spinner("Running init..."):
-                cs = ContextSearch(gemini_key, google_key, google_cx)
+                cs = ContextSearch(GOOGLE_API_KEY=google_key, GOOGLE_CX=google_cx)
 
             with st.spinner("Searching for images..."):
                 try:
-                    images = cs.search(query, limit=limit, custom_prompt=custom_prompt)  # returns List[ImageSearchResult]
-                except Exception as e:
+                    images = cs.searchWithContext(query, limit=limit, custom_prompt=custom_prompt)
+                except Exception:
                     st.error("Search failed.")
                     with st.expander("Details"):
                         st.code("".join(traceback.format_exception(*sys.exc_info())), language="text")
